@@ -13,29 +13,57 @@ class ArticlePage extends StatefulWidget {
 
 class ArticlePageState extends State<ArticlePage> {
   Future<ArticleModel> articleFuture;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: widget.article?.title,
-        ),
-        body: FutureBuilder(
-          future: articleFuture,
-          builder: asyncContentBuilder,
-        )
+    return FutureBuilder(
+      future: articleFuture,
+      builder: asyncContentBuilder,
     );
+  }
+
+
+  Widget getArticleTitle() {
+    if (widget.article == null || widget.article.title == null) {
+      return Text("Loading Article...");
+    }
+    return Text(widget.article.title);
   }
 
   Widget asyncContentBuilder(BuildContext context, AsyncSnapshot<ArticleModel> snapshot) {
     if (snapshot.connectionState == ConnectionState.done) {
       if (snapshot.hasError) {
-        return ArticleGetError(snapshot.error);
+        return Scaffold(
+        appBar: AppBar(
+          title: getArticleTitle(),
+        ),
+          body: ArticleGetError(snapshot.error),
+        );
       }
       widget.article = snapshot.data;
-      return ArticleContent(article: snapshot.data);
+      changeActionBarTitle();
+      return Scaffold(
+          appBar: AppBar(
+            title: getArticleTitle(),
+          ),
+          body: ArticleContent(article: snapshot.data));
     } else {
-      return Center(child: CircularProgressIndicator());
+      return Scaffold(
+          appBar: AppBar(
+            title: getArticleTitle(),
+          ),
+          body: Center(child: CircularProgressIndicator())
+      );
     }
+  }
+
+  changeActionBarTitle() {
+    if (widget.article != null) return;
+    Future.delayed(Duration(milliseconds: 100)).then((_) {
+      setState(() {
+        print('changeActionBarTitle');
+      });
+    });
   }
 
   @override
