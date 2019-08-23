@@ -1,5 +1,4 @@
 import 'dart:convert';
-//import 'package:http/http.dart' as http;
 
 class ArticleDataModel {
   final data;
@@ -19,15 +18,16 @@ class ArticleDataModel {
 }
 
 class ArticleModel {
-  final date;
-  final author;
-  final title;
-  final digest;
-  final content;
-  final wc;
+  final ArticleDate date;
+  final String author;
+  final String title;
+  final String digest;
+  final String content;
+  final int wc;
+  final int star;
 
   ArticleModel(
-      {this.date, this.author, this.title, this.digest, this.content, this.wc});
+      {this.date, this.author, this.title, this.digest, this.content, this.wc, this.star = 0});
 
   factory ArticleModel.fromJson(Map<String, dynamic> json) {
 
@@ -51,7 +51,21 @@ class ArticleModel {
 
   @override
   String toString() {
-    return '{date:$date, author:$author, title:$title, digest:$digest, content:$content, wc:$wc}';
+    return '{date:$date, author:$author, title:$title, digest:$digest, content:$content, wc:$wc, star:$star}';
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "date_curr":date.curr,
+      "date_prev":date.prev,
+      "date_next":date.next,
+      "author":author,
+      "title":title,
+      "digest":digest,
+      "content":content,
+      "wc":wc,
+      "star":star,
+    };
   }
 }
 
@@ -74,27 +88,4 @@ class ArticleDate {
   String toString() {
     return '{curr:$curr, prev,$prev, next,$next}';
   }
-}
-
-void main() async {
-//  var client = http.Client();
-//  final response =
-//      await client.get('https://interface.meiriyiwen.com/article/day?dev=1&date=20190609');
-//  Map<String, dynamic> decoded = json.decode(response.body);
-//  print(decoded.runtimeType);
-//
-//  ArticleDataModel model = ArticleDataModel.fromJson(decoded);
-//  print(model);
-//  var encoded = json.encode(model);
-//  print(encoded);
-
-    String listJson = '{"city": "Mumbai","streets":["address1","address2"]}';
-
-    var decoded = json.decode(listJson);
-    print(decoded.runtimeType);
-    print(decoded);
-    var streets = decoded['streets'].map((address) => address + 'converted').toList();
-    var listStreets = List<String>.from(streets);
-    print(listStreets.runtimeType);
-    print(listStreets);
 }

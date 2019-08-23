@@ -35,7 +35,7 @@ class ArticlePageState extends State<ArticlePage> {
     if (snapshot.connectionState == ConnectionState.done) {
       if (snapshot.hasError) {
         return Scaffold(
-        appBar: getAppBar(snapshot.data.title),
+        appBar: getAppBar(),
           body: ArticleGetError(snapshot.error),
         );
       }

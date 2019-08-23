@@ -23,6 +23,7 @@ class ArticleRepo {
   ArticleRepo._internal() {
     _cache = Map<String, ArticleModel>();
     articleService = OneArticleService();
+    articleDb = OneArticleDb();
   }
 
   Future<ArticleModel> getTodayArticle() async {
@@ -35,7 +36,18 @@ class ArticleRepo {
     }
 
     try {
+      ArticleModel articleModel = await articleDb.getArticlesByDate(DateTime.now());
+      if (articleModel != null) {
+        _cache[key] = articleModel;
+        return articleModel;
+      }
+    } catch (err) {
+      return Future.error(err);
+    }
+
+    try {
       ArticleModel articleModel = await articleService.getArticle();
+      articleDb.insertArticle(articleModel);
       _cache[key] = articleModel;
       return articleModel;
     } catch (err) {
