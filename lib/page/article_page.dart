@@ -22,54 +22,43 @@ class ArticlePageState extends State<ArticlePage> {
     );
   }
 
-
   Widget getArticleTitle() {
     if (widget.article == null || widget.article.title == null) {
-      return Text("Loading Article...");
+      return Center(child: Text("Loading Article..."));
     }
-    return Text(widget.article.title);
+    return Center(child: Text(widget.article.title));
+  }
+
+  Widget getAppBar() {
+    return AppBar(
+      title: getArticleTitle(),
+    );
   }
 
   Widget asyncContentBuilder(BuildContext context, AsyncSnapshot<ArticleModel> snapshot) {
     if (snapshot.connectionState == ConnectionState.done) {
       if (snapshot.hasError) {
         return Scaffold(
-        appBar: AppBar(
-          title: getArticleTitle(),
-        ),
+        appBar: getAppBar(),
           body: ArticleGetError(snapshot.error),
         );
       }
       widget.article = snapshot.data;
-      changeActionBarTitle();
       return Scaffold(
-          appBar: AppBar(
-            title: getArticleTitle(),
-          ),
+          appBar: getAppBar(),
           body: ArticleContent(article: snapshot.data));
     } else {
       return Scaffold(
-          appBar: AppBar(
-            title: getArticleTitle(),
-          ),
+          appBar: getAppBar(),
           body: Center(child: CircularProgressIndicator())
       );
     }
   }
 
-  changeActionBarTitle() {
-    if (widget.article != null) return;
-    Future.delayed(Duration(milliseconds: 100)).then((_) {
-      setState(() {
-        print('changeActionBarTitle');
-      });
-    });
-  }
-
   @override
   void initState() {
     print('ArticlePageState initState()');
-    articleFuture = ArticleRepo.cached().getTodayArticle();
+    articleFuture = ArticleRepo().getTodayArticle();
     super.initState();
   }
 

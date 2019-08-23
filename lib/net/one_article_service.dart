@@ -11,6 +11,22 @@ class OneArticleService {
   final String randomArticle = "/article/random?dev=1";
   final String somedayArticle = "/article/day?dev=1&date=";
 
+  // single instance
+  factory OneArticleService() =>_getInstance();
+  static OneArticleService get instance => _getInstance();
+  static OneArticleService _instance;
+
+  OneArticleService._internal() {
+    // init network service here
+  }
+
+  static OneArticleService _getInstance() {
+    if (_instance == null) {
+      _instance = new OneArticleService._internal();
+    }
+    return _instance;
+  }
+
   Future<ArticleModel> getArticle() async {
     print('OneArticleService getArticle');
     var client = http.Client();

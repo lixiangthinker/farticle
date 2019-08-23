@@ -7,12 +7,22 @@ class ArticleRepo {
   Map<String, ArticleModel> _cache;
   OneArticleService articleService;
   OneArticleDb articleDb;
-  ArticleRepo([this.articleService]){
-    _cache = Map<String, ArticleModel>();
+
+  // single instance
+  factory ArticleRepo() =>_getInstance();
+  static ArticleRepo get instance => _getInstance();
+  static ArticleRepo _instance;
+
+  static ArticleRepo _getInstance() {
+    if (_instance == null) {
+      _instance = new ArticleRepo._internal();
+    }
+    return _instance;
   }
 
-  factory ArticleRepo.cached() {
-    return ArticleRepo(OneArticleService());
+  ArticleRepo._internal() {
+    _cache = Map<String, ArticleModel>();
+    articleService = OneArticleService();
   }
 
   Future<ArticleModel> getTodayArticle() async {
