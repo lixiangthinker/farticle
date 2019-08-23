@@ -3,10 +3,6 @@ import 'package:fweather/model/article_model.dart';
 import 'package:fweather/repo/article_repo.dart';
 
 class ArticlePage extends StatefulWidget {
-  ArticleModel article;
-
-  ArticlePage({Key key, this.article}) : super(key: key);
-
   @override
   ArticlePageState createState() => ArticlePageState();
 }
@@ -22,16 +18,16 @@ class ArticlePageState extends State<ArticlePage> {
     );
   }
 
-  Widget getArticleTitle() {
-    if (widget.article == null || widget.article.title == null) {
+  Widget getArticleTitle([String title]) {
+    if (title == null) {
       return Center(child: Text("Loading Article..."));
     }
-    return Center(child: Text(widget.article.title));
+    return Center(child: Text(title));
   }
 
-  Widget getAppBar() {
+  Widget getAppBar([String title]) {
     return AppBar(
-      title: getArticleTitle(),
+      title: getArticleTitle(title),
     );
   }
 
@@ -39,13 +35,12 @@ class ArticlePageState extends State<ArticlePage> {
     if (snapshot.connectionState == ConnectionState.done) {
       if (snapshot.hasError) {
         return Scaffold(
-        appBar: getAppBar(),
+        appBar: getAppBar(snapshot.data.title),
           body: ArticleGetError(snapshot.error),
         );
       }
-      widget.article = snapshot.data;
       return Scaffold(
-          appBar: getAppBar(),
+          appBar: getAppBar(snapshot.data.title),
           body: ArticleContent(article: snapshot.data));
     } else {
       return Scaffold(
