@@ -69,7 +69,7 @@ class ArticlePageState extends State<ArticlePage> {
   @override
   void initState() {
     print('ArticlePageState initState()');
-    articleFuture = ArticleRepo().getTodayArticle();
+    articleFuture = ArticleRepo.instance.getTodayArticle();
     super.initState();
   }
 
@@ -86,6 +86,7 @@ class ArticlePageState extends State<ArticlePage> {
   }
 
   void _handleLike() {
+    print('ArticlePageState _handleLike()');
     if (articleModel == null) return;
     setState(() {
       articleModel.star = !articleModel.star;
@@ -93,9 +94,11 @@ class ArticlePageState extends State<ArticlePage> {
     ArticleRepo.instance.updateArticle(articleModel);
   }
 
-
   void _handleRefreshArticle() {
-    //TODO: handle refresh.
+    print('ArticlePageState _handleRefreshArticle()');
+    setState(() {
+      articleFuture = ArticleRepo.instance.getTodayArticle();
+    });
   }
 }
 
