@@ -15,7 +15,7 @@ class ArticlePageState extends State<ArticlePage> {
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: articleFuture,
-      builder: asyncContentBuilder,
+      builder: _asyncContentBuilder,
     );
   }
 
@@ -53,6 +53,7 @@ class ArticlePageState extends State<ArticlePage> {
             leading: Icon(Icons.all_inclusive),
             title: Text('随机阅读', style: TextStyle(fontSize: 20),),
             onTap: () {
+              _handleGetRandomArticle();
               Navigator.pop(context);
             },
           ),
@@ -90,7 +91,7 @@ class ArticlePageState extends State<ArticlePage> {
     );
   }
 
-  Widget asyncContentBuilder(BuildContext context, AsyncSnapshot<ArticleModel> snapshot) {
+  Widget _asyncContentBuilder(BuildContext context, AsyncSnapshot<ArticleModel> snapshot) {
     if (snapshot.connectionState == ConnectionState.done) {
       if (snapshot.hasError) {
         return Scaffold(
@@ -144,8 +145,21 @@ class ArticlePageState extends State<ArticlePage> {
 
   void _handleRefreshArticle() {
     print('ArticlePageState _handleRefreshArticle()');
+    if (articleModel == null) {
+      setState(() {
+        articleFuture = ArticleRepo.instance.getTodayArticle();
+      });
+    } else {
+      setState(() {
+        articleFuture = ArticleRepo.instance.getArticleByDate(articleModel.date.curr);
+      });
+    }
+  }
+
+  void _handleGetRandomArticle() {
+    print('ArticlePageState _handleGetRandomArticle()');
     setState(() {
-      articleFuture = ArticleRepo.instance.getTodayArticle();
+      articleFuture = ArticleRepo.instance.getRandomArticle();
     });
   }
 }
