@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fweather/model/article_model.dart';
 import 'package:fweather/repo/article_repo.dart';
+import 'package:fweather/utils/utils.dart' as utils;
 import 'package:fweather/widget/left_drawer.dart';
 
 class ArticlePage extends StatefulWidget {
@@ -23,7 +24,7 @@ class ArticlePageState extends State<ArticlePage> {
     if (articleModel == null || articleModel.title == null) {
       return Text("Loading Article...");
     }
-    return Text(articleModel.title);
+    return Text(utils.formatTitleString(articleModel.date.curr));
   }
 
   Widget _getDrawer() {
@@ -41,10 +42,12 @@ class ArticlePageState extends State<ArticlePage> {
               color: Colors.blue,
             ),
           ),
+          Divider(),
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('阅读设置', style: TextStyle(fontSize: 20),),
+            leading: Icon(Icons.reply),
+            title: Text('昨日重现', style: TextStyle(fontSize: 20),),
             onTap: () {
+              _handleGetYesterdayArticle();
               Navigator.pop(context);
             },
           ),
@@ -61,6 +64,14 @@ class ArticlePageState extends State<ArticlePage> {
           ListTile(
             leading: Icon(Icons.star),
             title: Text('我的收藏', style: TextStyle(fontSize: 20),),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          Divider(),
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text('阅读设置', style: TextStyle(fontSize: 20),),
             onTap: () {
               Navigator.pop(context);
             },
@@ -158,9 +169,28 @@ class ArticlePageState extends State<ArticlePage> {
 
   void _handleGetRandomArticle() {
     print('ArticlePageState _handleGetRandomArticle()');
-    setState(() {
-      articleFuture = ArticleRepo.instance.getRandomArticle();
-    });
+    if (articleModel == null) {
+      setState(() {
+        articleFuture = ArticleRepo.instance.getTodayArticle();
+      });
+    } else {
+      setState(() {
+        articleFuture = ArticleRepo.instance.getRandomArticle();
+      });
+    }
+  }
+
+  void _handleGetYesterdayArticle() {
+    print('ArticlePageState _handleGetYesterdayArticle()');
+    if (articleModel == null) {
+      setState(() {
+        articleFuture = ArticleRepo.instance.getTodayArticle();
+      });
+    } else {
+      setState(() {
+        articleFuture = ArticleRepo.instance.getArticleByDate(articleModel.date.prev);
+      });
+    }
   }
 }
 
@@ -191,7 +221,7 @@ class ArticleContent extends StatelessWidget {
             ),
             Divider(),
             Text(
-              "Total ${article.wc.toString()} words.",
+              "全文共 ${article.wc.toString()} 字.",
               style: TextStyle(fontSize: 18, color: Colors.grey),
             )
           ],

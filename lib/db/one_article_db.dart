@@ -11,9 +11,10 @@ class OneArticleDb {
 
   static OneArticleDb get instance => _getInstance();
   static OneArticleDb _instance;
+  var database;
 
   OneArticleDb._internal() {
-    // init db service here
+    database = _openDatabase();
   }
 
   static OneArticleDb _getInstance() {
@@ -25,7 +26,6 @@ class OneArticleDb {
 
   static const int DB_VERSION = 1;
   static const String TABLE_NAME = "articles";
-  static const String COLUMN_ID = "id";
   static const String COLUMN_DATE_CURR = "date_curr";
   static const String COLUMN_DATE_PREV = "date_prev";
   static const String COLUMN_DATE_NEXT = "date_next";
@@ -43,8 +43,7 @@ class OneArticleDb {
       onCreate: (db, version) {
         return db.execute(
           """CREATE TABLE $TABLE_NAME (
-            $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            $COLUMN_DATE_CURR TEXT NULL UNIQUE,
+            $COLUMN_DATE_CURR TEXT NULL PRIMARY KEY UNIQUE,
             $COLUMN_DATE_PREV TEXT NULL,
             $COLUMN_DATE_NEXT TEXT NULL,
             $COLUMN_AUTHOR TEXT NULL,
@@ -61,10 +60,10 @@ class OneArticleDb {
   }
 
   Future<void> insertArticle(ArticleModel articleModel) async {
-    print(
-        'OneArticleDb insertArticle articleModel curr = ${articleModel.date.curr}');
+    print('OneArticleDb insertArticle articleModel '
+        'curr = ${articleModel.date.curr}');
     // Get a reference to the database.
-    final Database db = await _openDatabase();
+    final Database db = await database;
 
     // Insert the ArticleModel into the correct table. Also specify the
     // `conflictAlgorithm`. In this case, if the same dog is inserted
@@ -77,10 +76,23 @@ class OneArticleDb {
     print('OneArticleDb insertArticle result = $result');
   }
 
+  Future<bool> existArticle(ArticleModel articleModel) async {
+    print('OneArticleDb insertArticle existArticle '
+        'curr = ${articleModel.date.curr}');
+    final Database db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      TABLE_NAME,
+      where: "date_curr=?",
+      whereArgs: ['${articleModel.date.curr}'],
+    );
+
+    return !(maps.length==0);
+  }
+
   Future<List<ArticleModel>> articles() async {
     print('OneArticleDb articles');
     // Get a reference to the database.
-    final Database db = await _openDatabase();
+    final Database db = await database;
 
     // Query the table for all The articles.
     final List<Map<String, dynamic>> maps = await db.query(TABLE_NAME);
@@ -99,7 +111,7 @@ class OneArticleDb {
         content: maps[i]['content'],
         wc: maps[i]['wc'],
         digest: maps[i]['digest'],
-        star: maps[i]['star'],
+        star: maps[i]['star']==1,
       );
     });
   }
@@ -107,7 +119,7 @@ class OneArticleDb {
   Future<ArticleModel> getArticlesByDate(DateTime dateTime) async {
     print('OneArticleDb getArticlesByDate dateTime = $dateTime');
     // Get a reference to the database.
-    final Database db = await _openDatabase();
+    final Database db = await database;
     var curr = utils.getDateString(dateTime);
     // Query the table for all The articles.
     final List<Map<String, dynamic>> maps = await db.query(
@@ -143,16 +155,46 @@ class OneArticleDb {
   Future<void> updateArticle(ArticleModel articleModel) async {
     print('OneArticleDb updateArticle curr = ${articleModel.date.curr}, star = ${articleModel.star}');
     // Get a reference to the database.
-    final Database db = await _openDatabase();
+    final Database db = await database;
 
     // Update the given Dog.
     await db.update(
       TABLE_NAME,
       articleModel.toMap(),
-      // Ensure that the Dog has a matching id.
       where: "date_curr = ?",
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
       whereArgs: [articleModel.date.curr],
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+}
+
+main() async {
+  ArticleModel getArticle() {
+    ArticleDate date = ArticleDate.fromJson({
+      "curr":"20181009",
+      "prev":"20181008",
+      "next":"20181010",
+    });
+    ArticleModel newResult = ArticleModel(date: date,
+        author: "author", title:"title",
+        digest:"digest",content:"content",wc:100);
+    newResult.star = true;
+    return newResult;
+  }
+
+  var dbService = OneArticleDb.instance;
+
+  await dbService.insertArticle(getArticle());
+  List<ArticleModel> result = await dbService.articles();
+  result.forEach((articleModel) {
+    print("curr = ${articleModel.date.curr}, content = ${articleModel.content.substring(0,5)}");
+  });
+  print(result.length);
+
+  await dbService.insertArticle(getArticle());
+  result = await dbService.articles();
+  result.forEach((articleModel) {
+    print("curr = ${articleModel.date.curr}, content = ${articleModel.content.substring(0,5)}");
+  });
+  print(result.length);
 }

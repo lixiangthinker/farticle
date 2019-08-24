@@ -6,6 +6,12 @@ String getDateString([DateTime dateTime]) {
   return formatter.format(dateTime);
 }
 
+String formatTitleString(String dateString) {
+  DateTime dateTime = getDateTimeFromString(dateString);
+  var formatter = DateFormat('yyyy-MM-dd');
+  return formatter.format(dateTime);
+}
+
 DateTime getDateTimeFromString(String dateString) {
   try {
     int year = int.parse(dateString?.substring(0, 4));
