@@ -42,6 +42,7 @@ class ArticlePageState extends State<ArticlePage> {
             ),
           ),
           ListTile(
+            leading: Icon(Icons.settings),
             title: Text('阅读设置', style: TextStyle(fontSize: 20),),
             onTap: () {
               Navigator.pop(context);
@@ -49,6 +50,7 @@ class ArticlePageState extends State<ArticlePage> {
           ),
           Divider(),
           ListTile(
+            leading: Icon(Icons.all_inclusive),
             title: Text('随机阅读', style: TextStyle(fontSize: 20),),
             onTap: () {
               Navigator.pop(context);
@@ -56,6 +58,7 @@ class ArticlePageState extends State<ArticlePage> {
           ),
           Divider(),
           ListTile(
+            leading: Icon(Icons.star),
             title: Text('我的收藏', style: TextStyle(fontSize: 20),),
             onTap: () {
               Navigator.pop(context);
