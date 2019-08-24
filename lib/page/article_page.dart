@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fweather/model/article_model.dart';
 import 'package:fweather/repo/article_repo.dart';
+import 'package:fweather/widget/left_drawer.dart';
 
 class ArticlePage extends StatefulWidget {
   @override
@@ -18,16 +19,56 @@ class ArticlePageState extends State<ArticlePage> {
     );
   }
 
-  Widget getArticleTitle() {
+  Widget _getArticleTitle() {
     if (articleModel == null || articleModel.title == null) {
       return Text("Loading Article...");
     }
     return Text(articleModel.title);
   }
 
-  Widget getAppBar() {
+  Widget _getDrawer() {
+    return LeftDrawer(
+      widthPercent: 0.6,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+            child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('每日一文', style: TextStyle(fontSize: 32, color: Colors.white),
+                )),
+            decoration: BoxDecoration(
+              color: Colors.blue,
+            ),
+          ),
+          ListTile(
+            title: Text('阅读设置', style: TextStyle(fontSize: 20),),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          Divider(),
+          ListTile(
+            title: Text('随机阅读', style: TextStyle(fontSize: 20),),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          Divider(),
+          ListTile(
+            title: Text('我的收藏', style: TextStyle(fontSize: 20),),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _getAppBar() {
     return AppBar(
-      title: getArticleTitle(),
+      title: _getArticleTitle(),
       centerTitle: true,
       actions: <Widget>[
         IconButton(
@@ -50,18 +91,22 @@ class ArticlePageState extends State<ArticlePage> {
     if (snapshot.connectionState == ConnectionState.done) {
       if (snapshot.hasError) {
         return Scaffold(
-          appBar: getAppBar(),
+          appBar: _getAppBar(),
           body: ArticleGetError(snapshot.error),
+          drawer: _getDrawer(),
         );
       }
       articleModel = snapshot.data;
       return Scaffold(
-          appBar: getAppBar(),
-          body: ArticleContent(article: snapshot.data));
+          appBar: _getAppBar(),
+          body: ArticleContent(article: snapshot.data),
+          drawer: _getDrawer(),
+      );
     } else {
       return Scaffold(
-          appBar: getAppBar(),
-          body: Center(child: CircularProgressIndicator())
+          appBar: _getAppBar(),
+          body: Center(child: CircularProgressIndicator(),),
+          drawer: _getDrawer(),
       );
     }
   }
