@@ -9,7 +9,7 @@ class ArticlePage extends StatefulWidget {
 
 class ArticlePageState extends State<ArticlePage> {
   Future<ArticleModel> articleFuture;
-
+  ArticleModel articleModel;
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -18,16 +18,31 @@ class ArticlePageState extends State<ArticlePage> {
     );
   }
 
-  Widget getArticleTitle([String title]) {
-    if (title == null) {
-      return Center(child: Text("Loading Article..."));
+  Widget getArticleTitle() {
+    if (articleModel == null || articleModel.title == null) {
+      return Text("Loading Article...");
     }
-    return Center(child: Text(title));
+    return Text(articleModel.title);
   }
 
-  Widget getAppBar([String title]) {
+  Widget getAppBar() {
     return AppBar(
-      title: getArticleTitle(title),
+      title: getArticleTitle(),
+      centerTitle: true,
+      actions: <Widget>[
+        IconButton(
+          icon: Icon((articleModel == null || !articleModel.star)?Icons.star_border:Icons.star),
+          onPressed: (){
+            _handleLike();
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.refresh),
+          onPressed: (){
+            _handleRefreshArticle();
+          },
+        ),
+      ],
     );
   }
 
@@ -35,12 +50,13 @@ class ArticlePageState extends State<ArticlePage> {
     if (snapshot.connectionState == ConnectionState.done) {
       if (snapshot.hasError) {
         return Scaffold(
-        appBar: getAppBar(),
+          appBar: getAppBar(),
           body: ArticleGetError(snapshot.error),
         );
       }
+      articleModel = snapshot.data;
       return Scaffold(
-          appBar: getAppBar(snapshot.data.title),
+          appBar: getAppBar(),
           body: ArticleContent(article: snapshot.data));
     } else {
       return Scaffold(
@@ -68,6 +84,19 @@ class ArticlePageState extends State<ArticlePage> {
     print('ArticlePageState dispose()');
     super.dispose();
   }
+
+  void _handleLike() {
+    if (articleModel == null) return;
+    setState(() {
+      articleModel.star = !articleModel.star;
+    });
+    ArticleRepo.instance.updateArticle(articleModel);
+  }
+
+
+  void _handleRefreshArticle() {
+    //TODO: handle refresh.
+  }
 }
 
 class ArticleContent extends StatelessWidget {
@@ -88,12 +117,18 @@ class ArticleContent extends StatelessWidget {
             ),
             Text(
               article.author,
-              style: TextStyle(fontSize: 24),
+              style: TextStyle(fontSize: 24, color: Colors.grey),
             ),
+            Divider(),
             Text(
               article.content,
               style: TextStyle(fontSize: 24),
             ),
+            Divider(),
+            Text(
+              "Total ${article.wc.toString()} words.",
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            )
           ],
         ),
       ),

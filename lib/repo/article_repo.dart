@@ -5,11 +5,12 @@ import 'package:fweather/utils/utils.dart' as utils;
 
 class ArticleRepo {
   Map<String, ArticleModel> _cache;
-  OneArticleService articleService;
-  OneArticleDb articleDb;
+  OneArticleService _articleService;
+  OneArticleDb _articleDb;
 
   // single instance
-  factory ArticleRepo() =>_getInstance();
+  factory ArticleRepo() => _getInstance();
+
   static ArticleRepo get instance => _getInstance();
   static ArticleRepo _instance;
 
@@ -22,8 +23,8 @@ class ArticleRepo {
 
   ArticleRepo._internal() {
     _cache = Map<String, ArticleModel>();
-    articleService = OneArticleService();
-    articleDb = OneArticleDb();
+    _articleService = OneArticleService();
+    _articleDb = OneArticleDb();
   }
 
   Future<ArticleModel> getTodayArticle() async {
@@ -36,7 +37,8 @@ class ArticleRepo {
     }
 
     try {
-      ArticleModel articleModel = await articleDb.getArticlesByDate(DateTime.now());
+      ArticleModel articleModel =
+          await _articleDb.getArticlesByDate(DateTime.now());
       if (articleModel != null) {
         _cache[key] = articleModel;
         return articleModel;
@@ -46,10 +48,21 @@ class ArticleRepo {
     }
 
     try {
-      ArticleModel articleModel = await articleService.getArticle();
-      articleDb.insertArticle(articleModel);
+      ArticleModel articleModel = await _articleService.getArticle();
+      _articleDb.insertArticle(articleModel);
       _cache[key] = articleModel;
       return articleModel;
+    } catch (err) {
+      return Future.error(err);
+    }
+  }
+
+  Future<void> updateArticle(ArticleModel articleModel) async {
+    print('ArticleRepo updateArticle curr = ${articleModel.date.curr} '
+        'star = ${articleModel.star}');
+    _cache[articleModel.date.curr] = articleModel;
+    try {
+      await _articleDb.updateArticle(articleModel);
     } catch (err) {
       return Future.error(err);
     }

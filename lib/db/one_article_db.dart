@@ -135,8 +135,24 @@ class OneArticleDb {
         content: maps[i]['content'],
         wc: maps[i]['wc'],
         digest: maps[i]['digest'],
-        star: maps[i]['star'],
+        star: maps[i]['star']==1,
       );
     })[0];
+  }
+
+  Future<void> updateArticle(ArticleModel articleModel) async {
+    print('OneArticleDb updateArticle curr = ${articleModel.date.curr}, star = ${articleModel.star}');
+    // Get a reference to the database.
+    final Database db = await _openDatabase();
+
+    // Update the given Dog.
+    await db.update(
+      TABLE_NAME,
+      articleModel.toMap(),
+      // Ensure that the Dog has a matching id.
+      where: "date_curr = ?",
+      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      whereArgs: [articleModel.date.curr],
+    );
   }
 }

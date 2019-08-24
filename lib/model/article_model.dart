@@ -24,10 +24,10 @@ class ArticleModel {
   final String digest;
   final String content;
   final int wc;
-  final int star;
+  bool star;
 
   ArticleModel(
-      {this.date, this.author, this.title, this.digest, this.content, this.wc, this.star = 0});
+      {this.date, this.author, this.title, this.digest, this.content, this.wc, this.star = false});
 
   factory ArticleModel.fromJson(Map<String, dynamic> json) {
 
@@ -64,7 +64,7 @@ class ArticleModel {
       "digest":digest,
       "content":content,
       "wc":wc,
-      "star":star,
+      "star":star?1:0,
     };
   }
 }
