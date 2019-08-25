@@ -29,7 +29,8 @@ class ArticleRepo {
 
   Future<ArticleModel> getTodayArticle() async {
     print('ArticleRepo getTodayArticle');
-    String key = utils.getDateString(DateTime.now());
+    DateTime dateTime = DateTime.now();
+    String key = utils.getDateString(dateTime);
 
     if (_cache.containsKey(key)) {
       print('ArticleRepo getTodayArticle from cache');
@@ -38,7 +39,7 @@ class ArticleRepo {
 
     try {
       ArticleModel articleModel =
-          await _articleDb.getArticlesByDate(DateTime.now());
+          await _articleDb.getArticlesByDate(dateTime);
       if (articleModel != null) {
         _cache[key] = articleModel;
         return articleModel;
@@ -48,9 +49,24 @@ class ArticleRepo {
     }
 
     try {
+      // api /article/today?dev=1 may have a different dateTime value. be careful.
       ArticleModel articleModel = await _articleService.getArticle();
-      _articleDb.insertArticle(articleModel);
-      _cache[key] = articleModel;
+      String newKey = articleModel.date.curr;
+
+      if (newKey == key) {
+        _articleDb.insertArticle(articleModel);
+        _cache[key] = articleModel;
+      } else {
+        ArticleModel newkeyArticle =
+        await _articleDb.getArticlesByDate(utils.getDateTimeFromString(newKey));
+        if (newkeyArticle == null) {
+          _articleDb.insertArticle(articleModel);
+          _cache[key] = articleModel;
+        } else {
+          _cache[newKey] = newkeyArticle;
+          return newkeyArticle;
+        }
+      }
       return articleModel;
     } catch (err) {
       return Future.error(err);
@@ -85,7 +101,7 @@ class ArticleRepo {
   }
 
   Future<ArticleModel> getArticleByDate(String dateString) async {
-    print('ArticleRepo getArticleByDate');
+    print('ArticleRepo getArticleByDate $dateString');
     DateTime key = utils.getDateTimeFromString(dateString);
 
     if (_cache.containsKey(dateString)) {
@@ -95,7 +111,7 @@ class ArticleRepo {
 
     try {
       ArticleModel articleModel =
-      await _articleDb.getArticlesByDate(DateTime.now());
+      await _articleDb.getArticlesByDate(key);
       if (articleModel != null) {
         _cache[dateString] = articleModel;
         return articleModel;

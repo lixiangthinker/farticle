@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fweather/model/article_model.dart';
-import 'package:fweather/page/star_list_page.dart';
 import 'package:fweather/repo/article_repo.dart';
 import 'package:fweather/utils/utils.dart' as utils;
 import 'package:fweather/widget/left_drawer.dart';
@@ -51,27 +50,19 @@ class ArticlePageState extends State<ArticlePage> {
           ListTile(
             leading: Icon(Icons.reply),
             title: Text('昨日重现', style: TextStyle(fontSize: 20),),
-            onTap: () {
-              _handleGetYesterdayArticle();
-              Navigator.pop(context);
-            },
+            onTap: _handleGetYesterdayArticle,
           ),
           Divider(),
           ListTile(
             leading: Icon(Icons.all_inclusive),
             title: Text('随机阅读', style: TextStyle(fontSize: 20),),
-            onTap: () {
-              _handleGetRandomArticle();
-              Navigator.pop(context);
-            },
+            onTap: _handleGetRandomArticle,
           ),
           Divider(),
           ListTile(
             leading: Icon(Icons.star),
             title: Text('我的收藏', style: TextStyle(fontSize: 20),),
-            onTap: () {
-              _handleOnTap();
-            },
+            onTap: _handleMyStars,
           ),
           Divider(),
           ListTile(
@@ -93,15 +84,11 @@ class ArticlePageState extends State<ArticlePage> {
       actions: <Widget>[
         IconButton(
           icon: Icon((articleModel == null || !articleModel.star)?Icons.star_border:Icons.star),
-          onPressed: (){
-            _handleLike();
-          },
+          onPressed: _handleLike,
         ),
         IconButton(
           icon: Icon(Icons.refresh),
-          onPressed: (){
-            _handleRefreshArticle();
-          },
+          onPressed: _handleRefreshArticle,
         ),
       ],
     );
@@ -183,6 +170,7 @@ class ArticlePageState extends State<ArticlePage> {
         articleFuture = ArticleRepo.instance.getRandomArticle();
       });
     }
+    Navigator.pop(context);
   }
 
   void _handleGetYesterdayArticle() {
@@ -196,10 +184,11 @@ class ArticlePageState extends State<ArticlePage> {
         articleFuture = ArticleRepo.instance.getArticleByDate(articleModel.date.prev);
       });
     }
+    Navigator.pop(context);
   }
 
 
-  void _handleOnTap() async {
+  void _handleMyStars() async {
     var result = await Navigator.pushNamed(context, "/stars");
     print("result = $result");
     Navigator.pop(context);
