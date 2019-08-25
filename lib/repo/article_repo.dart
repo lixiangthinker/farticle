@@ -57,6 +57,20 @@ class ArticleRepo {
     }
   }
 
+  Future<List<ArticleModel>> getStaredArticle() async {
+    try {
+      List<ArticleModel> articleModelList =
+      await _articleDb.getStaredArticles();
+      if (articleModelList != null) {
+        return articleModelList;
+      } else {
+        return null;
+      }
+    } catch (err) {
+      return Future.error(err);
+    }
+  }
+
   Future<ArticleModel> getRandomArticle() async {
     print('ArticleRepo getRandomArticle');
 
@@ -72,10 +86,26 @@ class ArticleRepo {
 
   Future<ArticleModel> getArticleByDate(String dateString) async {
     print('ArticleRepo getArticleByDate');
-    DateTime dateTime = utils.getDateTimeFromString(dateString);
+    DateTime key = utils.getDateTimeFromString(dateString);
+
+    if (_cache.containsKey(dateString)) {
+      print('ArticleRepo getTodayArticle from cache');
+      return _cache[dateString];
+    }
 
     try {
-      ArticleModel articleModel = await _articleService.getArticleByDate(dateTime);
+      ArticleModel articleModel =
+      await _articleDb.getArticlesByDate(DateTime.now());
+      if (articleModel != null) {
+        _cache[dateString] = articleModel;
+        return articleModel;
+      }
+    } catch (err) {
+      return Future.error(err);
+    }
+
+    try {
+      ArticleModel articleModel = await _articleService.getArticleByDate(key);
       _articleDb.insertArticle(articleModel);
       _cache[articleModel.date.curr] = articleModel;
       return articleModel;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fweather/page/article_page.dart';
+import 'package:fweather/page/star_list_page.dart';
 
 void main() => runApp(OneArticleApp());
 
@@ -15,6 +16,7 @@ class OneArticleApp extends StatelessWidget {
       ),
       routes: {
         '/' : (_) => ArticlePage(),
+        '/stars': (_) => StarListPage(),
       },
     );
   }

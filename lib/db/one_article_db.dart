@@ -116,6 +116,32 @@ class OneArticleDb {
     });
   }
 
+  Future<List<ArticleModel>> getStaredArticles() async {
+    print('OneArticleDb getStaredArticles');
+    // Get a reference to the database.
+    final Database db = await database;
+    // Query the table for all The articles.
+    final List<Map<String, dynamic>> maps = await db.query(TABLE_NAME, where: "star=?", whereArgs: [1]);
+
+    // Convert the List<Map<String, dynamic> into a List<ArticleModel>.
+    return List.generate(maps.length, (i) {
+      var date = ArticleDate(
+        curr: maps[i]['date_curr'],
+        prev: maps[i]['date_prev'],
+        next: maps[i]['date_next'],
+      );
+      return ArticleModel(
+        date: date,
+        author: maps[i]['author'],
+        title: maps[i]['title'],
+        content: maps[i]['content'],
+        wc: maps[i]['wc'],
+        digest: maps[i]['digest'],
+        star: maps[i]['star']==1,
+      );
+    });
+  }
+
   Future<ArticleModel> getArticlesByDate(DateTime dateTime) async {
     print('OneArticleDb getArticlesByDate dateTime = $dateTime');
     // Get a reference to the database.

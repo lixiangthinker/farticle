@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:fweather/model/article_model.dart';
+import 'package:fweather/page/star_list_page.dart';
 import 'package:fweather/repo/article_repo.dart';
 import 'package:fweather/utils/utils.dart' as utils;
 import 'package:fweather/widget/left_drawer.dart';
 
 class ArticlePage extends StatefulWidget {
+  final ArticleModel article;
+
+  ArticlePage({Key key, this.article}) : super(key: key);
+
   @override
   ArticlePageState createState() => ArticlePageState();
 }
@@ -65,7 +70,7 @@ class ArticlePageState extends State<ArticlePage> {
             leading: Icon(Icons.star),
             title: Text('我的收藏', style: TextStyle(fontSize: 20),),
             onTap: () {
-              Navigator.pop(context);
+              _handleOnTap();
             },
           ),
           Divider(),
@@ -189,6 +194,22 @@ class ArticlePageState extends State<ArticlePage> {
     } else {
       setState(() {
         articleFuture = ArticleRepo.instance.getArticleByDate(articleModel.date.prev);
+      });
+    }
+  }
+
+
+  void _handleOnTap() async {
+    var result = await Navigator.pushNamed(context, "/stars");
+    print("result = $result");
+    Navigator.pop(context);
+    if (result == null) {
+      setState(() {
+        articleFuture = ArticleRepo.instance.getTodayArticle();
+      });
+    } else {
+      setState(() {
+        articleFuture = ArticleRepo.instance.getArticleByDate((result as ArticleModel).date.curr);
       });
     }
   }
