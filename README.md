@@ -1,16 +1,32 @@
-# fweather
+# farticle
 
-A new Flutter Weather application.
+Flutter 版本<每日一文>。
 
-## Getting Started
+## 应用简介
 
-This project is a starting point for a Flutter application.
+每天一篇中文散文，API 来自[https://meiriyiwen.com/](https://meiriyiwen.com/)。
 
-A few resources to get you started if this is your first Flutter project:
+非商业用途，仅供学习flutter编程使用，如果侵权，请联系作者删除。
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+作者： 微博 @Tony_Builder
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 应用架构
+
+可以认为是一个Flutter应用的最小系统：
+
+- net 模块封装web api，通过 http lib获取网络数据，通过dart:convert转换为ArticleModel;
+- db 模块封装了数据库访问api, 通过 sqflite lib 缓存获取的文章数据
+- repo 通过repo 封装了net 和 db，ui获取数据的统一接口；实现了RAM，DB，Network的三级缓存访问机制。
+- page UI层：
+1. ArticlePage 主页面，呈现文章内容。支持收藏，刷新。包含drawer和bottom sheet;
+  1.1 drawer 支持显示昨天文章，随机文章，收藏列表，阅读设置。
+  1.2 昨天文章，随机文章都在主页面刷新；收藏列表打开新页面；阅读设置打开bottom sheet页面；
+2. StarListPage 收藏页面，显示收藏文章列表,点击收藏文章跳转回主页面。
+
+
+
+
+
+
+
+
