@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fweather/model/article_model.dart';
 import 'package:fweather/repo/article_repo.dart';
+import 'package:fweather/utils/shared_pref_utils.dart' as sp;
 import 'package:fweather/utils/utils.dart' as utils;
 import 'package:fweather/widget/left_drawer.dart';
 
@@ -16,6 +17,9 @@ class ArticlePage extends StatefulWidget {
 class ArticlePageState extends State<ArticlePage> {
   Future<ArticleModel> articleFuture;
   ArticleModel articleModel;
+
+  double _fontSize = 24;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -68,9 +72,7 @@ class ArticlePageState extends State<ArticlePage> {
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('阅读设置', style: TextStyle(fontSize: 20),),
-            onTap: () {
-              Navigator.pop(context);
-            },
+            onTap: _handleReadSettings,
           ),
         ],
       ),
@@ -106,7 +108,7 @@ class ArticlePageState extends State<ArticlePage> {
       articleModel = snapshot.data;
       return Scaffold(
           appBar: _getAppBar(),
-          body: ArticleContent(article: snapshot.data),
+          body: ArticleContent(article: snapshot.data, contentFontSize: _fontSize,),
           drawer: _getDrawer(),
       );
     } else {
@@ -122,6 +124,9 @@ class ArticlePageState extends State<ArticlePage> {
   void initState() {
     print('ArticlePageState initState()');
     articleFuture = ArticleRepo.instance.getTodayArticle();
+    sp.getFontSize().then((value) {
+      _fontSize = value;
+    });
     super.initState();
   }
 
@@ -202,13 +207,90 @@ class ArticlePageState extends State<ArticlePage> {
       });
     }
   }
+
+  void _handleReadSettings() {
+    Navigator.pop(context);
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, mSetState) {
+            return GestureDetector(
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10))),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text('字体大小'),
+                        Expanded(
+                            child: Slider(
+                              onChanged: (value){
+                                double valueRound = value.roundToDouble();
+                                mSetState(
+                                    () {
+                                      _fontSize = valueRound;
+                                    }
+                                );
+                                _onFontSliderChange(value);
+                              },
+                              onChangeEnd: (result){
+                                print('Slider onChangeEnd $result');
+                                sp.storeFontSize(result);
+                              },
+                              divisions: 24,
+                              label: "${_fontSize.round()}",
+                              value: _fontSize,
+                              min: 12,
+                              max: 36,
+                            )),
+                      ],
+                    ),
+
+                    Container(
+                      height: 20,
+                    )
+                  ],
+                ),
+                height: 250,
+                padding: EdgeInsets.all(10),
+              ),
+              onTap: () => false,
+            );
+          },
+        );
+      }
+    );
+  }
+
+  void _onFontSliderChange(double value) {
+    double valueRound = value.roundToDouble();
+    setState(() {
+      _fontSize = valueRound;
+    });
+  }
 }
 
-class ArticleContent extends StatelessWidget {
+class ArticleContent extends StatefulWidget {
   final ArticleModel article;
+  final double contentFontSize;
 
-  ArticleContent({Key key, this.article}) : super(key: key);
+  ArticleContent({Key key, this.article, this.contentFontSize = 24}) : super(key: key);
 
+  @override
+  ArticleContentState createState() => ArticleContentState();
+}
+
+class ArticleContentState extends State<ArticleContent> {
+  static const double CONTENT_FONT_SIZE_MAX = 36;
+  static const double CONTENT_FONT_SIZE_MIN = 12;
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -217,21 +299,21 @@ class ArticleContent extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Text(
-              article.title,
+              widget.article.title,
               style: TextStyle(fontSize: 30),
             ),
             Text(
-              article.author,
+              widget.article.author,
               style: TextStyle(fontSize: 24, color: Colors.grey),
             ),
             Divider(),
             Text(
-              article.content,
-              style: TextStyle(fontSize: 24),
+              widget.article.content,
+              style: TextStyle(fontSize: widget.contentFontSize),
             ),
             Divider(),
             Text(
-              "全文共 ${article.wc.toString()} 字.",
+              "全文共 ${widget.article.wc.toString()} 字.",
               style: TextStyle(fontSize: 18, color: Colors.grey),
             )
           ],

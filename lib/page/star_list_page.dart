@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:fweather/model/article_model.dart';
 import 'package:fweather/repo/article_repo.dart';
 
-import 'article_page.dart';
-
 class StarListPage extends StatefulWidget {
   @override
   StarListPageState createState() => StarListPageState();
